@@ -5,6 +5,7 @@ project(OdbCMake)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
 find_package(ODB REQUIRED COMPONENTS qt sqlite OPTIONAL_COMPONENTS mysql pgsql)
+include(${ODB_USE_FILE})
 
 set(OdbCMake_SOURCES
 	driver.cpp
@@ -13,7 +14,7 @@ set(OdbCMake_SOURCES
 set(OdbCMake_ODB_HEADERS
 	person.h)
 
-#odb_wrap_cpp(OdbCMake_SOURCES ${OdbCMake_ODB_HEADERS}
+odb_wrap_cpp(OdbCMake_SOURCES ${OdbCMake_ODB_HEADERS} DB sqlite)
 
 add_executable(odbcmake
 	${OdbCMake_SOURCES}
@@ -23,4 +24,3 @@ target_link_libraries(odbcmake
 target_include_directories(odbcmake
 	PRIVATE
 		${ODB_INCLUDE_DIRS})
-
