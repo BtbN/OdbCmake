@@ -1,5 +1,29 @@
 #
-# Doc is still TODO
+# This module defines the following variables:
+#
+#   ODB_USE_FILE - Path to the UseODB.cmake file. Use it to include the ODB use file.
+#                  The use file defines the needed functionality to compile and use
+#                  odb generated headers.
+#
+#   ODB_FOUND - All required components and the core library were found
+#   ODB_INCLUDR_DIRS - Combined list of all components include dirs
+#   ODB_LIBRARIES - Combined list of all componenets libraries
+#
+#   ODB_LIBODB_FOUND - Libodb core library was found
+#   ODB_LIBODB_INCLUDE_DIRS - Include dirs for libodb core library
+#   ODB_LIBODB_LIBRARIES - Libraries for libodb core library
+#
+# For each requested component the following variables are defined:
+#
+#   ODB_<component>_FOUND - The component was found
+#   ODB_<component>_INCLUDE_DIRS - The components include dirs
+#   ODB_<component>_LIBRARIES - The components libraries
+#
+# <component> is the original or uppercase name of the component
+#
+# The component names relate directly to the odb module names.
+# So for the libodb-mysql.so library, the component is named mysql,
+# for the libodb-qt.so module it's qt, and so on.
 #
 
 set(ODB_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UseODB.cmake")
@@ -15,7 +39,7 @@ function(find_odb_api component)
 	find_path(ODB_${component}_INCLUDE_DIR
 		NAMES odb/${component}/version.hxx
 		HINTS
-			${LIBODB_INCLUDE_DIRS}
+			${ODB_LIBODB_INCLUDE_DIRS}
 			${PC_ODB_${component}_INCLUDE_DIRS})
 
 	find_library(ODB_${component}_LIBRARY
@@ -63,18 +87,18 @@ find_program(odb_BIN
 	HINTS
 		${libodb_INCLUDE_DIR}/../bin)
 
-set(LIBODB_INCLUDE_DIRS ${libodb_INCLUDE_DIR} CACHE STRING "ODB libodb include dirs")
-set(LIBODB_LIBRARIES ${libodb_LIBRARY} CACHE STRING "ODB libodb library")
+set(ODB_LIBODB_INCLUDE_DIRS ${libodb_INCLUDE_DIR} CACHE STRING "ODB libodb include dirs")
+set(ODB_LIBODB_LIBRARIES ${libodb_LIBRARY} CACHE STRING "ODB libodb library")
 set(ODB_EXECUTABLE ${odb_BIN} CACHE STRING "ODB executable")
 
 mark_as_advanced(libodb_INCLUDE_DIR libodb_LIBRARY odb_BIN)
 
-if(LIBODB_INCLUDE_DIRS AND LIBODB_LIBRARIES)
-	set(LIBODB_FOUND TRUE)
+if(ODB_LIBODB_INCLUDE_DIRS AND ODB_LIBODB_LIBRARIES)
+	set(ODB_LIBODB_FOUND TRUE)
 endif()
 
-set(ODB_INCLUDE_DIRS ${LIBODB_INCLUDE_DIRS})
-set(ODB_LIBRARIES ${LIBODB_LIBRARIES})
+set(ODB_INCLUDE_DIRS ${ODB_LIBODB_INCLUDE_DIRS})
+set(ODB_LIBRARIES ${ODB_LIBODB_LIBRARIES})
 
 foreach(component ${ODB_FIND_COMPONENTS})
 	find_odb_api(${component})
@@ -83,5 +107,5 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(ODB
 	FOUND_VAR ODB_FOUND
-	REQUIRED_VARS ODB_EXECUTABLE LIBODB_FOUND
+	REQUIRED_VARS ODB_EXECUTABLE ODB_LIBODB_FOUND
 	HANDLE_COMPONENTS)
