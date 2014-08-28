@@ -10,7 +10,7 @@
 #include "database.h" // create_database
 
 #include "person.h"
-#include "person-odb.h"
+#include "person_odb.h"
 
 using namespace std;
 using namespace odb::core;

@@ -14,7 +14,7 @@ set(OdbCMake_SOURCES
 set(OdbCMake_ODB_HEADERS
 	person.h)
 
-odb_compile(OdbCMake_SOURCES FILES ${OdbCMake_ODB_HEADERS} DB sqlite)
+odb_compile(OdbCMake_SOURCES FILES ${OdbCMake_ODB_HEADERS} DB sqlite GENERATE_QUERY GENERATE_SESSION)
 
 add_executable(odbcmake
 	${OdbCMake_SOURCES}

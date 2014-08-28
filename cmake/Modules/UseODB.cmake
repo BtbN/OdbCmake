@@ -5,6 +5,8 @@ set(ODB_COMPILE_INLINE_SUFFIX "_inline.h")
 set(ODB_COMPILE_SOURCE_SUFFIX ".cpp")
 set(ODB_COMPILE_FILE_SUFFIX "_odb")
 
+set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
+
 function(odb_compile outvar)
 	if(NOT ODB_EXECUTABLE)
 		message(FATAL_ERROR "odb compiler executable not found")
@@ -110,17 +112,18 @@ function(odb_compile outvar)
 
 	file(MAKE_DIRECTORY "${ODB_COMPILE_OUTPUT_DIR}")
 
-	set(output_files)
 	foreach(input ${PARAM_FILES})
 		get_filename_component(output "${input}" NAME_WE)
-		set(output "${output}${ODB_COMPILE_FILE_SUFFIX}${ODB_COMPILE_SOURCE_SUFFIX}")
-		list(APPEND output_files "${ODB_COMPILE_OUTPUT_DIR}/${output}")
+		set(output "${ODB_COMPILE_OUTPUT_DIR}/${output}${ODB_COMPILE_FILE_SUFFIX}${ODB_COMPILE_SOURCE_SUFFIX}")
+
+		list(APPEND ${outvar} "${output}")
+
+		add_custom_command(OUTPUT "${output}"
+			COMMAND ${ODB_EXECUTABLE} ${ODB_ARGS} "${input}"
+			DEPENDS "${input}"
+			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+			VERBATIM)
 	endforeach()
 
-	add_custom_command(OUTPUT ${output_files}
-		COMMAND ${ODB_EXECUTABLE} ${ODB_ARGS} ${PARAM_FILES}
-		DEPENDS ${PARAM_FILES}
-		VERBATIM)
-
-	list(APPEND ${outvar} ${output_files})
+	set(${outvar} ${${outvar}} PARENT_SCOPE)
 endfunction()
