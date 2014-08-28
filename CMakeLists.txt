@@ -14,7 +14,7 @@ set(OdbCMake_SOURCES
 set(OdbCMake_ODB_HEADERS
 	person.h)
 
-odb_wrap_cpp(OdbCMake_SOURCES ${OdbCMake_ODB_HEADERS} DB sqlite)
+odb_compile(OdbCMake_SOURCES FILES ${OdbCMake_ODB_HEADERS} DB sqlite)
 
 add_executable(odbcmake
 	${OdbCMake_SOURCES}
@@ -23,4 +23,8 @@ target_link_libraries(odbcmake
 	${ODB_LIBRARIES})
 target_include_directories(odbcmake
 	PRIVATE
-		${ODB_INCLUDE_DIRS})
+		${ODB_INCLUDE_DIRS}
+		${ODB_COMPILE_OUTPUT_DIR})
+target_compile_definitions(odbcmake
+	PRIVATE
+		DATABASE_SQLITE)
