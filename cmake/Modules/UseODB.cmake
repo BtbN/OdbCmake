@@ -1,4 +1,5 @@
 
+set(ODB_COMPILE_DEBUG FALSE)
 set(ODB_COMPILE_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/odb_gen")
 set(ODB_COMPILE_HEADER_SUFFIX ".h")
 set(ODB_COMPILE_INLINE_SUFFIX "_inline.h")
@@ -13,12 +14,13 @@ function(odb_compile outvar)
 	endif()
 
 	set(options GENERATE_QUERY GENERATE_SESSION GENERATE_SCHEMA GENERATE_PREPARED)
-	set(oneValueParams DB SCHEMA_FORMAT SCHEMA_NAME TABLE_PREFIX
+	set(oneValueParams SCHEMA_FORMAT SCHEMA_NAME TABLE_PREFIX
 		STANDARD SLOC_LIMIT
 		HEADER_PROLOGUE INLINE_PROLOGUE SOURCE_PROLOGUE
 		HEADER_EPILOGUE INLINE_EPILOGUE SOURCE_EPILOGUE
+		MULTI_DATABASE
 		PROFILE)
-	set(multiValueParams FILES INCLUDE)
+	set(multiValueParams FILES INCLUDE DB)
 
 	cmake_parse_arguments(PARAM "${options}" "${oneValueParams}" "${multiValueParams}" ${ARGN})
 
@@ -31,6 +33,14 @@ function(odb_compile outvar)
 	endif()
 
 	set(ODB_ARGS)
+
+	if(PARAM_MULTI_DATABASE)
+		list(APPEND ODB_ARGS --multi-database "${PARAM_MULTI_DATABASE}")
+	endif()
+
+	foreach(db ${PARAM_DB})
+		list(APPEND ODB_ARGS --database "${db}")
+	endforeach()
 
 	if(PARAM_GENERATE_QUERY)
 		list(APPEND ODB_ARGS --generate-query)
@@ -46,10 +56,6 @@ function(odb_compile outvar)
 
 	if(PARAM_GENERATE_PREPARED)
 		list(APPEND ODB_ARGS --generate-prepared)
-	endif()
-
-	if(PARAM_DB)
-		list(APPEND ODB_ARGS --database "${PARAM_DB}")
 	endif()
 
 	if(PARAM_SCHEMA_FORMAT)
@@ -118,6 +124,12 @@ function(odb_compile outvar)
 		set(output "${ODB_COMPILE_OUTPUT_DIR}/${output}${ODB_COMPILE_FILE_SUFFIX}${ODB_COMPILE_SOURCE_SUFFIX}")
 
 		list(APPEND ${outvar} "${output}")
+
+		if(ODB_COMPILE_DEBUG)
+			set(_msg "${ODB_EXECUTABLE} ${ODB_ARGS} ${input}")
+			string(REPLACE ";" " " _msg "${_msg}")
+			message(STATUS "${_msg}")
+		endif()
 
 		add_custom_command(OUTPUT "${output}"
 			COMMAND ${ODB_EXECUTABLE} ${ODB_ARGS} "${input}"
