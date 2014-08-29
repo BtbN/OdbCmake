@@ -36,6 +36,7 @@ function(odb_compile outvar)
 
 	if(PARAM_MULTI_DATABASE)
 		list(APPEND ODB_ARGS --multi-database "${PARAM_MULTI_DATABASE}")
+		list(APPEND PARAM_DB common)
 	endif()
 
 	foreach(db ${PARAM_DB})
@@ -139,10 +140,14 @@ function(odb_compile outvar)
 		set(outputs)
 
 		foreach(sfx ${ODB_COMPILE_FILE_SUFFIX})
+			string(REGEX REPLACE ":.*$" "" pfx "${sfx}")
 			string(REGEX REPLACE "^.*:" "" sfx "${sfx}")
-			set(output "${ODB_COMPILE_OUTPUT_DIR}/${fname}${sfx}${ODB_COMPILE_SOURCE_SUFFIX}")
-			list(APPEND ${outvar} "${output}")
-			list(APPEND outputs "${output}")
+
+			if(NOT "${PARAM_MULTI_DATABASE}" MATCHES "static" OR NOT "${pfx}" MATCHES "common")
+				set(output "${ODB_COMPILE_OUTPUT_DIR}/${fname}${sfx}${ODB_COMPILE_SOURCE_SUFFIX}")
+				list(APPEND ${outvar} "${output}")
+				list(APPEND outputs "${output}")
+			endif()
 		endforeach()
 
 		if(ODB_COMPILE_DEBUG)
