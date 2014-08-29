@@ -1,5 +1,5 @@
 
-set(ODB_COMPILE_DEBUG FALSE)
+set(ODB_COMPILE_DEBUG TRUE)
 set(ODB_COMPILE_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/odb_gen")
 set(ODB_COMPILE_HEADER_SUFFIX ".h")
 set(ODB_COMPILE_INLINE_SUFFIX "_inline.h")
@@ -39,7 +39,7 @@ function(odb_compile outvar)
 	endif()
 
 	foreach(db ${PARAM_DB})
-		list(APPEND ODB_ARGS --database "${db}")
+		list(APPEND ODB_ARGS -d "${db}")
 	endforeach()
 
 	if(PARAM_GENERATE_QUERY)
@@ -110,7 +110,22 @@ function(odb_compile outvar)
 	list(APPEND ODB_ARGS --hxx-suffix "${ODB_COMPILE_HEADER_SUFFIX}")
 	list(APPEND ODB_ARGS --ixx-suffix "${ODB_COMPILE_INLINE_SUFFIX}")
 	list(APPEND ODB_ARGS --cxx-suffix "${ODB_COMPILE_SOURCE_SUFFIX}")
-	list(APPEND ODB_ARGS --odb-file-suffix "${ODB_COMPILE_FILE_SUFFIX}")
+
+	if(PARAM_MULTI_DATABASE AND NOT "${ODB_COMPILE_FILE_SUFFIX}" MATCHES ".+:.+")
+		set(osuffix "${ODB_COMPILE_FILE_SUFFIX}")
+		set(ODB_COMPILE_FILE_SUFFIX)
+		foreach(db ${PARAM_DB})
+			if("${db}" MATCHES "common")
+				list(APPEND ODB_COMPILE_FILE_SUFFIX "${db}:${osuffix}")
+			else()
+				list(APPEND ODB_COMPILE_FILE_SUFFIX "${db}:${osuffix}_${db}")
+			endif()
+		endforeach()
+	endif()
+
+	foreach(sfx ${ODB_COMPILE_FILE_SUFFIX})
+		list(APPEND ODB_ARGS --odb-file-suffix "${sfx}")
+	endforeach()
 
 	foreach(dir ${PARAM_INCLUDE} ${ODB_INCLUDE_DIRS})
 		list(APPEND ODB_ARGS "-I${dir}")
@@ -121,9 +136,14 @@ function(odb_compile outvar)
 
 	foreach(input ${PARAM_FILES})
 		get_filename_component(output "${input}" NAME_WE)
-		set(output "${ODB_COMPILE_OUTPUT_DIR}/${output}${ODB_COMPILE_FILE_SUFFIX}${ODB_COMPILE_SOURCE_SUFFIX}")
+		set(outputs)
 
-		list(APPEND ${outvar} "${output}")
+		foreach(sfx ${ODB_COMPILE_FILE_SUFFIX})
+			string(REGEX REPLACE "^.*:" "" sfx "${sfx}")
+			set(output "${ODB_COMPILE_OUTPUT_DIR}/${output}${sfx}${ODB_COMPILE_SOURCE_SUFFIX}")
+			list(APPEND ${outvar} "${output}")
+			list(APPEND outputs "${output}")
+		endforeach()
 
 		if(ODB_COMPILE_DEBUG)
 			set(_msg "${ODB_EXECUTABLE} ${ODB_ARGS} ${input}")
@@ -131,7 +151,7 @@ function(odb_compile outvar)
 			message(STATUS "${_msg}")
 		endif()
 
-		add_custom_command(OUTPUT "${output}"
+		add_custom_command(OUTPUT ${outputs}
 			COMMAND ${ODB_EXECUTABLE} ${ODB_ARGS} "${input}"
 			DEPENDS "${input}"
 			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
