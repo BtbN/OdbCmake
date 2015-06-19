@@ -16,7 +16,7 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
-find_package(ODB REQUIRED COMPONENTS sqlite OPTIONAL_COMPONENTS mysql pgsql)
+find_package(ODB REQUIRED COMPONENTS mysql OPTIONAL_COMPONENTS pgsql)
 include(${ODB_USE_FILE})
 
 set(OdbCMake_SOURCES
@@ -24,9 +24,10 @@ set(OdbCMake_SOURCES
 	database.h)
 
 set(OdbCMake_ODB_HEADERS
-	person.h)
+	person.h
+  employee.h)
 
-odb_compile(OdbCMake_SOURCES FILES ${OdbCMake_ODB_HEADERS} DB sqlite GENERATE_QUERY GENERATE_SESSION)
+odb_compile(OdbCMake_SOURCES FILES ${OdbCMake_ODB_HEADERS} DB mysql GENERATE_QUERY GENERATE_SESSION INPUT_NAME "personal")
 
 add_executable(odbcmake
 	${OdbCMake_SOURCES}

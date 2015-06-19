@@ -19,7 +19,8 @@ function(odb_compile outvar)
 		HEADER_PROLOGUE INLINE_PROLOGUE SOURCE_PROLOGUE
 		HEADER_EPILOGUE INLINE_EPILOGUE SOURCE_EPILOGUE
 		MULTI_DATABASE
-		PROFILE)
+		PROFILE
+    INPUT_NAME)
 	set(multiValueParams FILES INCLUDE DB)
 
 	cmake_parse_arguments(PARAM "${options}" "${oneValueParams}" "${multiValueParams}" ${ARGN})
@@ -107,6 +108,11 @@ function(odb_compile outvar)
 		list(APPEND ODB_ARGS --profile "${PARAM_PROFILE}")
 	endif()
 
+  if(PARAM_INPUT_NAME)
+    list(APPEND ODB_ARGS --at-once)
+    list(APPEND ODB_ARGS --input-name "${PARAM_INPUT_NAME}")
+  endif()
+
 	list(APPEND ODB_ARGS --output-dir "${ODB_COMPILE_OUTPUT_DIR}")
 	list(APPEND ODB_ARGS --hxx-suffix "${ODB_COMPILE_HEADER_SUFFIX}")
 	list(APPEND ODB_ARGS --ixx-suffix "${ODB_COMPILE_INLINE_SUFFIX}")
@@ -135,33 +141,55 @@ function(odb_compile outvar)
 	file(REMOVE_RECURSE "${ODB_COMPILE_OUTPUT_DIR}")
 	file(MAKE_DIRECTORY "${ODB_COMPILE_OUTPUT_DIR}")
 
-	foreach(input ${PARAM_FILES})
-		get_filename_component(fname "${input}" NAME_WE)
-		set(outputs)
+  if(PARAM_INPUT_NAME)
+    get_filename_component(fname "${PARAM_INPUT_NAME}" NAME_WE)
+            set(outputs)
 
-		foreach(sfx ${ODB_COMPILE_FILE_SUFFIX})
-			string(REGEX REPLACE ":.*$" "" pfx "${sfx}")
-			string(REGEX REPLACE "^.*:" "" sfx "${sfx}")
+	  foreach(sfx ${ODB_COMPILE_FILE_SUFFIX})
+		  string(REGEX REPLACE ":.*$" "" pfx "${sfx}")
+		  string(REGEX REPLACE "^.*:" "" sfx "${sfx}")
 
-			if(NOT "${PARAM_MULTI_DATABASE}" MATCHES "static" OR NOT "${pfx}" MATCHES "common")
-				set(output "${ODB_COMPILE_OUTPUT_DIR}/${fname}${sfx}${ODB_COMPILE_SOURCE_SUFFIX}")
-				list(APPEND ${outvar} "${output}")
-				list(APPEND outputs "${output}")
-			endif()
-		endforeach()
+		  if(NOT "${PARAM_MULTI_DATABASE}" MATCHES "static" OR NOT "${pfx}" MATCHES "common")
+			  set(output "${ODB_COMPILE_OUTPUT_DIR}/${fname}${sfx}${ODB_COMPILE_SOURCE_SUFFIX}")
+			  list(APPEND ${outvar} "${output}")
+			  list(APPEND outputs "${output}")
+		  endif()
+	  endforeach()
 
-		if(ODB_COMPILE_DEBUG)
-			set(_msg "${ODB_EXECUTABLE} ${ODB_ARGS} ${input}")
-			string(REPLACE ";" " " _msg "${_msg}")
-			message(STATUS "${_msg}")
-		endif()
+    add_custom_command(OUTPUT ${outputs}
+      COMMAND ${ODB_EXECUTABLE} ${ODB_ARGS} ${PARAM_FILES}
+      DEPENDS ${PARAM_FILES}
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+            VERBATIM)
+  else()
+	  foreach(input ${PARAM_FILES})
+		  get_filename_component(fname "${input}" NAME_WE)
+		  set(outputs)
 
-		add_custom_command(OUTPUT ${outputs}
-			COMMAND ${ODB_EXECUTABLE} ${ODB_ARGS} "${input}"
-			DEPENDS "${input}"
-			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-			VERBATIM)
-	endforeach()
+		  foreach(sfx ${ODB_COMPILE_FILE_SUFFIX})
+			  string(REGEX REPLACE ":.*$" "" pfx "${sfx}")
+			  string(REGEX REPLACE "^.*:" "" sfx "${sfx}")
+
+			  if(NOT "${PARAM_MULTI_DATABASE}" MATCHES "static" OR NOT "${pfx}" MATCHES "common")
+				  set(output "${ODB_COMPILE_OUTPUT_DIR}/${fname}${sfx}${ODB_COMPILE_SOURCE_SUFFIX}")
+				  list(APPEND ${outvar} "${output}")
+				  list(APPEND outputs "${output}")
+			  endif()
+		  endforeach()
+
+		  if(ODB_COMPILE_DEBUG)
+			  set(_msg "${ODB_EXECUTABLE} ${ODB_ARGS} ${input}")
+			  string(REPLACE ";" " " _msg "${_msg}")
+			  message(STATUS "${_msg}")
+		  endif()
+
+		  add_custom_command(OUTPUT ${outputs}
+			  COMMAND ${ODB_EXECUTABLE} ${ODB_ARGS} "${input}"
+			  DEPENDS "${input}"
+			  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+			  VERBATIM)
+	  endforeach()
+  endif()
 
 	set(${outvar} ${${outvar}} PARENT_SCOPE)
 endfunction()
