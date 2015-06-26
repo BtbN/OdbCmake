@@ -10,8 +10,14 @@
 #include "database.h" // create_database
 
 #include "person.h"
-#include "person_odb.h"
+#include "employee.h"
 
+#ifdef AT_ONCE
+	#include "personal_odb.h"
+#else
+#include "person_odb.h"
+#include "employee_odb.h"
+#endif
 using namespace std;
 using namespace odb::core;
 
