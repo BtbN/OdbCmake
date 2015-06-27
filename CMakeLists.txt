@@ -46,7 +46,7 @@ if(AT_ONCE)
 	# trivial definitions for linux g++ and windows VC++
 	# correct for your compiler
 	if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		set_target_properties(odbcmake PROPERTIES COMPILE_FLAGS " -D AT_ONCE ")
+		set_target_properties(odbcmake PROPERTIES COMPILE_FLAGS " -DAT_ONCE ")
 	else()
 		set_target_properties(odbcmake PROPERTIES COMPILE_FLAGS " /D AT_ONCE ")
 	endif()
