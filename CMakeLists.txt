@@ -41,17 +41,9 @@ endif()
 add_executable(odbcmake
 	${OdbCMake_SOURCES}
 	${OdbCMake_ODB_HEADERS})
-	
-if(AT_ONCE)
-	# trivial definitions for linux g++ and windows VC++
-	# correct for your compiler
-	if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-		set_target_properties(odbcmake PROPERTIES COMPILE_FLAGS " -DAT_ONCE ")
-	else()
-		set_target_properties(odbcmake PROPERTIES COMPILE_FLAGS " /D AT_ONCE ")
-	endif()
-endif()
-	
+
+target_compile_definitions(odbcmake PUBLIC AT_ONCE)
+
 target_link_libraries(odbcmake
 	${ODB_LIBRARIES})
 target_include_directories(odbcmake
