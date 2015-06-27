@@ -1,7 +1,7 @@
 CMake Find Module and UseFile for ODB.
 
 ### Windows ODB installation notes:
-Install all odb components into some directory and setup environment variable ODB_ROOT=your_odb_installation_directory. 
+Install all odb components into some directory and setup environment variable CMAKE_PREFIX_PATH=your_odb_installation_directory. 
 Directory must contain sub-directories bin for executables(especially odb.exe) and dlls, 
 include/odb for odb headers and lib for lib files. 
 For example c:\odb\bin, c\odb\include and c:\odb\lib. Note: when you copy odb.exe - do not copy only exe file - you need all directories from archive.

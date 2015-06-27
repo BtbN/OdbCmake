@@ -69,7 +69,7 @@ endfunction()
 
 pkg_check_modules(PC_LIBODB QUIET "libodb")
 
-#set(ODB_LIBRARY_PATH "" CACHE STRING "Common library search hint for all ODB libs")
+set(ODB_LIBRARY_PATH "" CACHE STRING "Common library search hint for all ODB libs")
 
 find_path(libodb_INCLUDE_DIR
 	NAMES odb/version.hxx
