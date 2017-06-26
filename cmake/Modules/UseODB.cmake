@@ -19,7 +19,8 @@ function(odb_compile outvar)
 		HEADER_PROLOGUE INLINE_PROLOGUE SOURCE_PROLOGUE
 		HEADER_EPILOGUE INLINE_EPILOGUE SOURCE_EPILOGUE
 		MULTI_DATABASE
-		PROFILE)
+		PROFILE
+		X_CPP_OPTION)
 	set(multiValueParams FILES INCLUDE DB)
 
 	cmake_parse_arguments(PARAM "${options}" "${oneValueParams}" "${multiValueParams}" ${ARGN})
@@ -105,6 +106,10 @@ function(odb_compile outvar)
 
 	if(PARAM_PROFILE)
 		list(APPEND ODB_ARGS --profile "${PARAM_PROFILE}")
+	endif()
+
+        if(PARAM_X_CPP_OPTION)
+		list(APPEND ODB_ARGS -x "${PARAM_X_CPP_OPTION}")
 	endif()
 
 	list(APPEND ODB_ARGS --output-dir "${ODB_COMPILE_OUTPUT_DIR}")
