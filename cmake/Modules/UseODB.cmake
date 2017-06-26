@@ -108,7 +108,7 @@ function(odb_compile outvar)
 		list(APPEND ODB_ARGS --profile "${PARAM_PROFILE}")
 	endif()
 
-        if(PARAM_X_CPP_OPTION)
+	if(PARAM_X_CPP_OPTION)
 		list(APPEND ODB_ARGS -x "${PARAM_X_CPP_OPTION}")
 	endif()
 
