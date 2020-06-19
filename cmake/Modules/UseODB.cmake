@@ -13,7 +13,7 @@ function(odb_compile outvar)
 		message(FATAL_ERROR "odb compiler executable not found")
 	endif()
 
-	set(options GENERATE_QUERY GENERATE_SESSION GENERATE_SCHEMA GENERATE_PREPARED)
+	set(options AT_ONCE GENERATE_QUERY GENERATE_SESSION GENERATE_SCHEMA GENERATE_SCHEMA_ONLY GENERATE_PREPARED)
 	set(oneValueParams SCHEMA_FORMAT SCHEMA_NAME TABLE_PREFIX
 		STANDARD SLOC_LIMIT
 		HEADER_PROLOGUE INLINE_PROLOGUE SOURCE_PROLOGUE
@@ -43,6 +43,10 @@ function(odb_compile outvar)
 		list(APPEND ODB_ARGS -d "${db}")
 	endforeach()
 
+	if(PARAM_AT_ONCE)
+		list(APPEND ODB_ARGS --at-once)
+	endif()
+
 	if(PARAM_GENERATE_QUERY)
 		list(APPEND ODB_ARGS --generate-query)
 	endif()
@@ -53,6 +57,10 @@ function(odb_compile outvar)
 
 	if(PARAM_GENERATE_SCHEMA)
 		list(APPEND ODB_ARGS --generate-schema)
+	endif()
+
+	if(PARAM_GENERATE_SCHEMA_ONLY)
+		list(APPEND ODB_ARGS --generate-schema-only)
 	endif()
 
 	if(PARAM_GENERATE_PREPARED)
